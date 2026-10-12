@@ -14,6 +14,8 @@
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
+
     /// <summary>One mission a terminal offers (a QuestAlternativeIIR_t entry): the quest, then a byte.</summary>
     public class MissionInfo
     {
@@ -26,10 +28,12 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
 
         #endregion
 
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public Quest Quest { get; set; }
 
+        [AoMember(1)]
         public byte Unknown1 { get; set; }
 
         #endregion

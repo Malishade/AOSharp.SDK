@@ -14,15 +14,19 @@
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
+
     /// <summary>
     /// A room's door: the zone it links to and its packed position and rotation.
     /// </summary>
     public class DoorConnection
     {
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public short ZoneLink { get; set; }
 
+        [AoMember(1)]
         public short PosRot { get; set; }
 
         #endregion

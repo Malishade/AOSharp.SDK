@@ -15,18 +15,22 @@
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
     using AOSharp.Common.GameData;
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
     /// <summary>
     /// A destination: its id and the line it spans.
     /// </summary>
     public class PlayfieldDestination
     {
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public int Id { get; set; }
 
+        [AoMember(1)]
         public Vector3 Start { get; set; }
 
+        [AoMember(2)]
         public Vector3 End { get; set; }
 
         #endregion

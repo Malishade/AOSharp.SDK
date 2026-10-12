@@ -14,20 +14,26 @@
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
+
     /// <summary>
     /// The client's ACGItem_t, as its reader leaves it: a low id, a high id (the low id when 0), a quality (masked to
     /// 0x1ff when above it) and an int after it.
     /// </summary>
     public class AcgItem
     {
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public int LowId { get; set; }
 
+        [AoMember(1)]
         public int HighId { get; set; }
 
+        [AoMember(2)]
         public int Quality { get; set; }
 
+        [AoMember(3)]
         public int Unknown1 { get; set; }
 
         #endregion

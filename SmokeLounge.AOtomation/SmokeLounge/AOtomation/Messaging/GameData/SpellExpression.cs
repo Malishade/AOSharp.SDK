@@ -14,6 +14,8 @@
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
+
     /// <summary>
     /// A node of a spell's expression, by <see cref="Kind"/>: 1 a value, 2 a stat and a flag, 3 (compound) and 4
     /// (function) an operator with two nodes under it. Any other kind fails the read.
@@ -32,20 +34,27 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
 
         #endregion
 
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public int Kind { get; set; }
 
+        [AoMember(1)]
         public float Value { get; set; }
 
+        [AoMember(2)]
         public int Stat { get; set; }
 
+        [AoMember(3)]
         public int Flag { get; set; }
 
+        [AoMember(4)]
         public int Operator { get; set; }
 
+        [AoMember(5)]
         public SpellExpression Left { get; set; }
 
+        [AoMember(6)]
         public SpellExpression Right { get; set; }
 
         #endregion

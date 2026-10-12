@@ -16,19 +16,26 @@ using AOSharp.Common.GameData;
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
+
     /// <summary>A GridDestinationList_t entry of an <see cref="InfoPacket"/>.</summary>
     public class GridDestination
     {
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public int Unknown1 { get; set; }
 
+        [AoMember(1)]
         public Identity Identity { get; set; }
 
+        [AoMember(2)]
         public string Name { get; set; }
 
+        [AoMember(3)]
         public int Unknown2 { get; set; }
 
+        [AoMember(4)]
         public int Unknown3 { get; set; }
 
         #endregion

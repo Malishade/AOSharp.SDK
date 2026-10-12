@@ -15,6 +15,7 @@
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
     using AOSharp.Common.GameData;
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
     /// <summary>
     /// An entry of a quest's block list: an identity and a length-prefixed block. The client reads past the block
@@ -31,10 +32,12 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
 
         #endregion
 
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public Identity Identity { get; set; }
 
+        [AoMember(1)]
         public byte[] Data { get; set; }
 
         #endregion

@@ -16,6 +16,8 @@ using AOSharp.Common.GameData;
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
+
     /// <summary>
     /// The client's WorldPos_c in a quest action: a playfield, an x and z, and an offset; the position is the offset
     /// plus (x, 0, z). It must be valid: all zero, or both halves of the playfield set with the position and the
@@ -23,14 +25,18 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
     /// </summary>
     public class QuestWorldPos
     {
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public Identity Playfield { get; set; }
 
+        [AoMember(1)]
         public int X { get; set; }
 
+        [AoMember(2)]
         public int Z { get; set; }
 
+        [AoMember(3)]
         public Vector3 Offset { get; set; }
 
         public Vector3 Position

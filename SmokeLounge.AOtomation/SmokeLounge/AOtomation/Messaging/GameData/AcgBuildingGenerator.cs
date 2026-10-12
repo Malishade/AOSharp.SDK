@@ -17,6 +17,7 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
     using System.Collections.Generic;
 
     using AOSharp.Common.GameData;
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
     /// <summary>
     /// The client's ACGBuildingGeneratorData_t, which a generated dungeon's PlayfieldAnarchyF carries inline: the
@@ -42,26 +43,35 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
 
         #endregion
 
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public short Version { get; set; }
 
         /// <summary>In blocks.</summary>
+        [AoMember(1)]
         public ushort Width { get; set; }
 
         /// <summary>In blocks.</summary>
+        [AoMember(2)]
         public ushort Height { get; set; }
 
+        [AoMember(3)]
         public ushort FloorHeight { get; set; }
 
+        [AoMember(4)]
         public int TemplatePlayfield { get; set; }
 
+        [AoMember(5)]
         public byte AmbientRed { get; set; }
 
+        [AoMember(6)]
         public byte AmbientGreen { get; set; }
 
+        [AoMember(7)]
         public byte AmbientBlue { get; set; }
 
+        [AoMember(8)]
         public List<AcgRoom> Rooms { get; set; }
 
         #endregion

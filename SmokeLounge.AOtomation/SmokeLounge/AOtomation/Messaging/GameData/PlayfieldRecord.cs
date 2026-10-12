@@ -17,6 +17,7 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
     using System.Collections.Generic;
 
     using AOSharp.Common.GameData;
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
     /// <summary>
     /// The client's RDBPlayfield_t as a PlayfieldAnarchyF carries it inline (record type 1000001): the playfield's
@@ -49,18 +50,23 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
 
         #endregion
 
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public int Version { get; set; }
 
+        [AoMember(1)]
         public int Id { get; set; }
 
         /// <summary>At most 32 bytes.</summary>
+        [AoMember(2)]
         public string Name { get; set; }
 
         /// <summary>The playfield whose tiles it uses; another playfield's makes it indoors.</summary>
+        [AoMember(3)]
         public int TilemapId { get; set; }
 
+        [AoMember(4)]
         public int ZoneSize { get; set; }
 
         public bool IsIndoor
@@ -72,42 +78,56 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
         }
 
         /// <summary>From format version 9.</summary>
+        [AoMember(5)]
         public int Flags { get; set; }
 
+        [AoMember(6)]
         public int UnknownV9B { get; set; }
 
+        [AoMember(7)]
         public int PlayfieldTypeBits { get; set; }
 
+        [AoMember(8)]
         public int UnknownV9C { get; set; }
 
+        [AoMember(9)]
         public int UnknownV9D { get; set; }
 
         /// <summary>24 bytes the client reserves (from format version 9).</summary>
+        [AoMember(10)]
         public byte[] Reserved { get; set; }
 
         /// <summary>Indoors: a room per zone.</summary>
+        [AoMember(11)]
         public List<PlayfieldRoom> Rooms { get; set; }
 
         /// <summary>Outdoors: each zone's camera attractors (from format version 5; none before).</summary>
+        [AoMember(12)]
         public List<List<CameraAttractor>> Zones { get; set; }
 
+        [AoMember(13)]
         public List<WaterMesh> Water { get; set; }
 
+        [AoMember(14)]
         public int Unknown3 { get; set; }
 
+        [AoMember(15)]
         public int Unknown4 { get; set; }
 
         /// <summary>
         /// The environment's format (0 or less: no environment). 26 sends 22 bytes, 29 sends 25, any other 26.
         /// </summary>
+        [AoMember(16)]
         public int EnvironmentVersion { get; set; }
 
         /// <summary>
         /// EnvironmentData_t's bytes as sent: 0..7 the weights of the eight weather kinds, 8..18 the parameters (10 and
         /// 11 swapped), 19..25 values passed through.
         /// </summary>
+        [AoMember(17)]
         public byte[] Environment { get; set; }
 
+        [AoMember(18)]
         public List<PlayfieldDestination> Destinations { get; set; }
 
         #endregion

@@ -15,6 +15,7 @@
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
     using AOSharp.Common.GameData;
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
     /// <summary>
     /// A camera attractor: a position, an orientation, a target (from format version 6; the position before) and a
@@ -22,14 +23,18 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
     /// </summary>
     public class CameraAttractor
     {
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public Vector3 Position { get; set; }
 
+        [AoMember(1)]
         public Quaternion Orientation { get; set; }
 
+        [AoMember(2)]
         public Vector3 Target { get; set; }
 
+        [AoMember(3)]
         public float Range { get; set; }
 
         #endregion

@@ -17,6 +17,7 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
     using System.Collections.Generic;
 
     using AOSharp.Common.GameData;
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
     /// <summary>
     /// A water surface: its flags, its vertices and its triangles (three vertex indices each).
@@ -33,13 +34,16 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
 
         #endregion
 
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public int Flags { get; set; }
 
+        [AoMember(1)]
         public List<Vector3> Vertices { get; set; }
 
         /// <summary>Three indices per triangle.</summary>
+        [AoMember(2)]
         public List<short> Triangles { get; set; }
 
         #endregion

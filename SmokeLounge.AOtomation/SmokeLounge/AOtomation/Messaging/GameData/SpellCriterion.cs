@@ -14,15 +14,20 @@
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
+
     /// <summary>A requirement: two values and an operator (below 146, else the read fails).</summary>
     public class SpellCriterion
     {
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public int Value1 { get; set; }
 
+        [AoMember(1)]
         public int Value2 { get; set; }
 
+        [AoMember(2)]
         public int Operator { get; set; }
 
         #endregion

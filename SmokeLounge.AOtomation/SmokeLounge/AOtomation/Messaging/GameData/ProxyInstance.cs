@@ -15,6 +15,7 @@
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
     using System.Collections.Generic;
+    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
     /// <summary>
     /// A proxy instance's contents (identity types 0xC77B and 0xC77D), as a PlayfieldAnarchyF carries them inline: an
@@ -31,13 +32,16 @@ namespace SmokeLounge.AOtomation.Messaging.GameData
 
         #endregion
 
-        #region Public Properties
+        #region AoMember Properties
 
+        [AoMember(0)]
         public int Unknown1 { get; set; }
 
         /// <summary>0xC77B only.</summary>
+        [AoMember(1)]
         public ProxyInstanceData Data { get; set; }
 
+        [AoMember(2)]
         public List<ProxyDynel> Dynels { get; set; }
 
         #endregion
