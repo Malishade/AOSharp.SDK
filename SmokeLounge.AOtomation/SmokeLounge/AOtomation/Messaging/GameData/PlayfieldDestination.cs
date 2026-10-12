@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="InfoPacketType.cs" company="SmokeLounge">
+// <copyright file="PlayfieldDestination.cs" company="SmokeLounge">
 //   Copyright © 2013 SmokeLounge.
 //   This program is free software. It comes without any warranty, to
 //   the extent permitted by applicable law. You can redistribute it
@@ -8,26 +8,27 @@
 //   http://www.wtfpl.net/ for more details.
 // </copyright>
 // <summary>
-//   Defines the InfoPacketType type.
+//   Defines the PlayfieldDestination type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace SmokeLounge.AOtomation.Messaging.Messages.N3Messages
+namespace SmokeLounge.AOtomation.Messaging.GameData
 {
-    public enum InfoPacketType : byte
+    using AOSharp.Common.GameData;
+
+    /// <summary>
+    /// A destination: its id and the line it spans.
+    /// </summary>
+    public class PlayfieldDestination
     {
-        Character = 0x40, // 0100 0000
+        #region Public Properties
 
-        CharacterOrg = 0x41, // 0100 0001
+        public int Id { get; set; }
 
-        CharacterOrgSite = 0x43, // 0100 0011
+        public Vector3 Start { get; set; }
 
-        CharacterOrgSiteTower = 0x47, // 0100 0111
+        public Vector3 End { get; set; }
 
-        Monster = 0x50, // 0101 0000
-
-        Tower = 0x54, // 0101 0100
-
-        ControlTower = 0x5C // 0101 1100
+        #endregion
     }
 }

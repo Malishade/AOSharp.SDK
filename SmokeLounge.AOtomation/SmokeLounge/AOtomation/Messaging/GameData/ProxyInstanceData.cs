@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Mesh.cs" company="SmokeLounge">
+// <copyright file="ProxyInstanceData.cs" company="SmokeLounge">
 //   Copyright © 2013 SmokeLounge.
 //   This program is free software. It comes without any warranty, to
 //   the extent permitted by applicable law. You can redistribute it
@@ -8,61 +8,37 @@
 //   http://www.wtfpl.net/ for more details.
 // </copyright>
 // <summary>
-//   Defines the Mesh type.
+//   Defines the ProxyInstanceData type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
-    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
+    using AOSharp.Common.GameData;
 
-    public class AnimationEffect
+    /// <summary>
+    /// The block a 0xC77B proxy instance carries before its dynels.
+    /// </summary>
+    public class ProxyInstanceData
     {
-        #region AoMember Properties
+        #region Public Properties
 
-        [AoMember(0)]
-        public int IdentityType { get; set; }
-
-        [AoMember(1)]
-        public int NanoId { get; set; }
-
-        [AoMember(2)]
-        public int NanoInstance { get; set; }
-
-        [AoMember(3)]
-        public int Time1 { get; set; }
-
-        [AoMember(4)]
-        public int Time2 { get; set; }
-
-        [AoMember(5)]
         public int Unknown1 { get; set; }
 
-        [AoMember(6)]
-        public int Unknown2 { get; set; }
+        public Identity Unknown2 { get; set; }
 
-        [AoMember(7)]
         public int Unknown3 { get; set; }
 
-        [AoMember(8)]
-        public int Unknown4 { get; set; }
+        public Vector3 Unknown4 { get; set; }
 
-        [AoMember(9)]
         public int Unknown5 { get; set; }
 
-        [AoMember(10)]
         public int Unknown6 { get; set; }
 
-        [AoMember(11)]
-        public int Unknown7 { get; set; }
+        public float Unknown7 { get; set; }
 
-        [AoMember(12)]
         public int Unknown8 { get; set; }
 
-        [AoMember(13)]
-        public int VisualDataId { get; set; }
-
-        [AoMember(14)]
         public int Unknown9 { get; set; }
 
         #endregion

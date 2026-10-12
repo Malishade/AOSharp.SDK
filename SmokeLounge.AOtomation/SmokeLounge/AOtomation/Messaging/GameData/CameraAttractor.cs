@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MissionItemReward.cs" company="SmokeLounge">
+// <copyright file="CameraAttractor.cs" company="SmokeLounge">
 //   Copyright © 2013 SmokeLounge.
 //   This program is free software. It comes without any warranty, to
 //   the extent permitted by applicable law. You can redistribute it
@@ -8,31 +8,29 @@
 //   http://www.wtfpl.net/ for more details.
 // </copyright>
 // <summary>
-//   Defines the MissionItemReward type.
+//   Defines the CameraAttractor type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
     using AOSharp.Common.GameData;
-    using SmokeLounge.AOtomation.Messaging.Serialization;
-    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
-    public class MissionItemReward
+    /// <summary>
+    /// A camera attractor: a position, an orientation, a target (from format version 6; the position before) and a
+    /// range.
+    /// </summary>
+    public class CameraAttractor
     {
-        #region AoMember Properties
+        #region Public Properties
 
-        [AoMember(0)]
-        public int LowId { get; set; }
+        public Vector3 Position { get; set; }
 
-        [AoMember(1)]
-        public int HighId { get; set; }
+        public Quaternion Orientation { get; set; }
 
-        [AoMember(2)]
-        public int Ql { get; set; }
+        public Vector3 Target { get; set; }
 
-        [AoMember(3)]
-        public int Unk { get; set; }
+        public float Range { get; set; }
 
         #endregion
     }

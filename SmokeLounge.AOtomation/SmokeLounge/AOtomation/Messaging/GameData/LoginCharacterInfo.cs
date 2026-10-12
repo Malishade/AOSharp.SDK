@@ -16,90 +16,88 @@ using AOSharp.Common.GameData;
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
-    using SmokeLounge.AOtomation.Messaging.Serialization;
-    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
-
+    /// <summary>
+    /// A character as the login server lists it: the client's CharacterData_t (its id, its PlayfieldProxy_t and
+    /// whether it is created) with its CharacterInfo_c, and in a list the status word after it. Both records carry a
+    /// version; older ones lack later fields, which keep the defaults here. Read and written by LoginStream.
+    /// </summary>
     public class LoginCharacterInfo
     {
         #region Constructors and Destructors
 
         public LoginCharacterInfo()
         {
-            this.Unknown1 = 4;
-            this.Unknown2 = 1;
+            this.Version = 4;
+            this.PlayfieldProxyVersion = (byte)'a';
+            this.CharacterInfoVersion = 5;
+            this.Name = "name unknown";
+            this.AreaName = "area unknown";
+            this.BanReason = string.Empty;
         }
 
         #endregion
 
-        #region AoMember Properties
+        #region Public Properties
 
-        [AoMember(0)]
-        public int Unknown1 { get; set; }
+        /// <summary>CharacterData_t's version (4 is written).</summary>
+        public int Version { get; set; }
 
-        [AoMember(1)]
         public int Id { get; set; }
 
-        [AoMember(2)]
+        /// <summary>'a' (from version 4); any other fails the read.</summary>
         public byte PlayfieldProxyVersion { get; set; }
 
-        [AoMember(3)]
+        /// <summary>Where the character is: its instance is the location the character select window shows.</summary>
         public Identity PlayfieldId { get; set; }
 
-        [AoMember(4)]
         public int PlayfieldAttribute { get; set; }
 
-        [AoMember(5)]
         public int ExitDoor { get; set; }
 
-        [AoMember(6)]
         public Identity ExitDoorId { get; set; }
 
-        [AoMember(7)]
-        public int Unknown2 { get; set; }
+        public bool Created { get; set; }
 
-        [AoMember(8)]
+        /// <summary>Data versions below 3 only: an int after <see cref="Created"/>, not stored by the client.</summary>
+        public int Unknown1 { get; set; }
+
+        /// <summary>CharacterInfo_c's version (5 is written).</summary>
         public int CharacterInfoVersion { get; set; }
 
-        [AoMember(9)]
+        /// <summary>The instance CharacterInfo_c carries; the client replaces it with <see cref="Id"/>.</summary>
         public int CharacterId { get; set; }
 
-        [AoMember(10)]
-        public int Unknown3 { get; set; }
+        /// <summary>From info version 5.</summary>
+        public int OrgInstance { get; set; }
 
-        [AoMember(11, SerializeSize = ArraySizeType.Int32)]
+        /// <summary>A length of 0xff or more is read as "ERROR-CHANGE-NAME", its bytes left unread, as the client does.</summary>
         public string Name { get; set; }
 
-        [AoMember(12)]
         public Breed Breed { get; set; }
 
-        [AoMember(13)]
         public Gender Gender { get; set; }
 
-        [AoMember(14)]
         public Profession Profession { get; set; }
 
-        [AoMember(15)]
         public int Level { get; set; }
 
-        [AoMember(16, SerializeSize = ArraySizeType.Int32)]
+        /// <summary>A length of 0xff or more is read as "ERROR-CHANGE-AREA", its bytes left unread.</summary>
         public string AreaName { get; set; }
 
-        [AoMember(17)]
-        public int Unknown4 { get; set; }
+        public int Banned { get; set; }
 
-        [AoMember(18)]
-        public int Unknown5 { get; set; }
+        public string BanReason { get; set; }
 
-        [AoMember(19)]
-        public int Unknown6 { get; set; }
+        /// <summary>From info version 4.</summary>
+        public int HeadMesh { get; set; }
 
-        [AoMember(20)]
-        public int Unknown7 { get; set; }
+        /// <summary>From info version 4: the height.</summary>
+        public int MonsterScale { get; set; }
 
-        [AoMember(21)]
-        public int Unknown8 { get; set; }
+        /// <summary>From info version 4: the width.</summary>
+        public Fatness Fatness { get; set; }
 
-        [AoMember(22)]
+        /// <summary>In a character list: bit 0 is "active".</summary>
         public CharacterStatus Status { get; set; }
 
         #endregion

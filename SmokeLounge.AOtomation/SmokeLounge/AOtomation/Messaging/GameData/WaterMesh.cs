@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="QuestIdentity.cs" company="SmokeLounge">
+// <copyright file="WaterMesh.cs" company="SmokeLounge">
 //   Copyright © 2013 SmokeLounge.
 //   This program is free software. It comes without any warranty, to
 //   the extent permitted by applicable law. You can redistribute it
@@ -8,25 +8,39 @@
 //   http://www.wtfpl.net/ for more details.
 // </copyright>
 // <summary>
-//   Defines the QuestIdentity type.
+//   Defines the WaterMesh type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SmokeLounge.AOtomation.Messaging.GameData
 {
+    using System.Collections.Generic;
+
     using AOSharp.Common.GameData;
-    using SmokeLounge.AOtomation.Messaging.Serialization;
-    using SmokeLounge.AOtomation.Messaging.Serialization.MappingAttributes;
 
-    public class QuestIdentity
+    /// <summary>
+    /// A water surface: its flags, its vertices and its triangles (three vertex indices each).
+    /// </summary>
+    public class WaterMesh
     {
-        #region AoMember Properties
+        #region Constructors and Destructors
 
-        [AoMember(0)]
-        public Identity Identity { get; set; }
+        public WaterMesh()
+        {
+            this.Vertices = new List<Vector3>();
+            this.Triangles = new List<short>();
+        }
 
-        [AoMember(1)]
-        public int Unknown1 { get; set; }
+        #endregion
+
+        #region Public Properties
+
+        public int Flags { get; set; }
+
+        public List<Vector3> Vertices { get; set; }
+
+        /// <summary>Three indices per triangle.</summary>
+        public List<short> Triangles { get; set; }
 
         #endregion
     }

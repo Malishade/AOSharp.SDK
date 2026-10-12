@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="QuestAction.cs" company="SmokeLounge">
+// <copyright file="SpellCriterion.cs" company="SmokeLounge">
 //   Copyright © 2013 SmokeLounge.
 //   This program is free software. It comes without any warranty, to
 //   the extent permitted by applicable law. You can redistribute it
@@ -8,14 +8,23 @@
 //   http://www.wtfpl.net/ for more details.
 // </copyright>
 // <summary>
-//   Defines the QuestAction type.
+//   Defines the SpellCriterion type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace SmokeLounge.AOtomation.Messaging.Messages.N3Messages
+namespace SmokeLounge.AOtomation.Messaging.GameData
 {
-    public enum QuestAction : int
+    /// <summary>A requirement: two values and an operator (below 146, else the read fails).</summary>
+    public class SpellCriterion
     {
-        Delete = 0x01,
+        #region Public Properties
+
+        public int Value1 { get; set; }
+
+        public int Value2 { get; set; }
+
+        public int Operator { get; set; }
+
+        #endregion
     }
 }
