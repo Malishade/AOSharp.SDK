@@ -98,7 +98,13 @@ namespace AOSharp.Bootstrap
         private static readonly object _hookCreateLock = new object();
 
         /// <summary>Resolves export address and creates/activates a hook. Returns the hook or null on failure. Optionally restricts execution to given thread IDs (SetExclusiveACL).</summary>
-        private static IHook<T> CreateAndActivateHook<T>(string module, string exportName, T hookCallback, int[] exclusiveThreadIds = null) where T : Delegate
+        /// <summary>
+        /// Creates a hook, stores it in <paramref name="slot"/>, and only then activates it. Hooks are set
+        /// up on the injector's thread while the game keeps running on its own, so a hooked function can
+        /// be called the moment the hook is active; its callback reads the slot to call the original, and
+        /// an empty slot there threw out of a native callback and took the game down.
+        /// </summary>
+        private static IHook<T> CreateAndActivateHook<T>(ref IHook<T> slot, string module, string exportName, T hookCallback, int[] exclusiveThreadIds = null) where T : Delegate
         {
             IntPtr address = GetProcAddress(module, exportName);
             if (address == IntPtr.Zero)
@@ -108,6 +114,7 @@ namespace AOSharp.Bootstrap
                 try
                 {
                     var hook = _reloadedHooks.CreateHook<T>(hookCallback, (long)address);
+                    slot = hook;
                     if (exclusiveThreadIds != null && exclusiveThreadIds.Length > 0)
                         SetExclusiveACL(exclusiveThreadIds);
                     hook.Activate();
@@ -420,104 +427,104 @@ namespace AOSharp.Bootstrap
                 return;
             }
 
-            _addChildDynelHook = CreateAndActivateHook<N3Playfield_t.DAddChildDynel>(
+            _addChildDynelHook = CreateAndActivateHook<N3Playfield_t.DAddChildDynel>(ref _addChildDynelHook, 
                 "N3.dll", "?AddChildDynel@n3Playfield_t@@QAEXPAVn3Dynel_t@@ABVVector3_t@@ABVQuaternion_t@@@Z",
                 N3Playfield_t__AddChildDynel_Hook);
 
-            _runEngineHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DRunEngine>(
+            _runEngineHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DRunEngine>(ref _runEngineHook, 
                 "Gamecode.dll", "?RunEngine@n3EngineClientAnarchy_t@@UAEXM@Z",
                 N3EngineClientAnarchy_RunEngine_Hook, exclusiveThreadIds: null);
 
-            _sendInPlayMessageHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DSendInPlayMessage>(
+            _sendInPlayMessageHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DSendInPlayMessage>(ref _sendInPlayMessageHook, 
                 "Gamecode.dll", "?N3Msg_SendInPlayMessage@n3EngineClientAnarchy_t@@QBE_NXZ",
                 N3EngineClientAnarchy_SendInPlayMessage_Hook);
 
-            _teleportStartedHook = CreateAndActivateHook<FlowControlModule_t.DTeleportStartedMessage>(
+            _teleportStartedHook = CreateAndActivateHook<FlowControlModule_t.DTeleportStartedMessage>(ref _teleportStartedHook, 
                 "GUI.dll", "?TeleportStartedMessage@FlowControlModule_t@@CAXXZ",
                 FlowControlModule_t_TeleportStarted_Hook);
 
-            _teleportFailedHook = CreateAndActivateHook<TeleportTrier_t.DTeleportFailed>(
+            _teleportFailedHook = CreateAndActivateHook<TeleportTrier_t.DTeleportFailed>(ref _teleportFailedHook, 
                 "Gamecode.dll", "?TeleportFailed@TeleportTrier_t@@QAEXXZ",
                 TeleportTrier_t_TeleportFailed_Hook);
 
-            _optionPanelModuleActivatedHook = CreateAndActivateHook<OptionPanelModule_c.DModuleActivated>(
+            _optionPanelModuleActivatedHook = CreateAndActivateHook<OptionPanelModule_c.DModuleActivated>(ref _optionPanelModuleActivatedHook, 
                 "GUI.dll", "?ModuleActivated@OptionPanelModule_c@@UAEX_N@Z",
                 OptionPanelModule_ModuleActivated_Hook);
 
-            _viewDeletedHook = CreateAndActivateHook<WindowController_c.DViewDeleted>(
+            _viewDeletedHook = CreateAndActivateHook<WindowController_c.DViewDeleted>(ref _viewDeletedHook, 
                 "GUI.dll", "?ViewDeleted@WindowController_c@@QAEXPAVView@@@Z",
                 WindowController_ViewDeleted_Hook);
 
-            _removeWindowHook = CreateAndActivateHook<WindowController_c.DRemoveWindow>(
+            _removeWindowHook = CreateAndActivateHook<WindowController_c.DRemoveWindow>(ref _removeWindowHook, 
                 "GUI.dll", "?RemoveWindow@WindowController_c@@QAEXPAVWindow@@@Z",
                 WindowController_RemoveWindow_Hook);
 
-            _dataBlockToMessageHook = CreateAndActivateHook<MessageProtocol.DDataBlockToMessage>(
+            _dataBlockToMessageHook = CreateAndActivateHook<MessageProtocol.DDataBlockToMessage>(ref _dataBlockToMessageHook, 
                 "MessageProtocol.dll", "?DataBlockToMessage@@YAPAVMessage_t@@IPAX@Z",
                 DataBlockToMessage_Hook);
 
-            _playfieldInitHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DPlayfieldInit>(
+            _playfieldInitHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DPlayfieldInit>(ref _playfieldInitHook, 
                 "Gamecode.dll", "?PlayfieldInit@n3EngineClientAnarchy_t@@UAEXI@Z",
                 N3EngineClientAnarchy_PlayfieldInit_Hook);
 
-            _joinTeamRequestHook = CreateAndActivateHook<TeamViewModule_c.DSlotJoinTeamRequest>(
+            _joinTeamRequestHook = CreateAndActivateHook<TeamViewModule_c.DSlotJoinTeamRequest>(ref _joinTeamRequestHook, 
                 "GUI.dll", "?SlotJoinTeamRequest@TeamViewModule_c@@AAEXABVIdentity_t@@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z",
                 TeamViewModule_SlotJoinTeamRequest_Hook);
 
-            _joinTeamRequestFailedLowHook = CreateAndActivateHook<TeamViewModule_c.DSlotJoinTeamRequestFailed>(
+            _joinTeamRequestFailedLowHook = CreateAndActivateHook<TeamViewModule_c.DSlotJoinTeamRequestFailed>(ref _joinTeamRequestFailedLowHook, 
                 "GUI.dll", "?SlotJoinTeamRequestFailedTooLow@TeamViewModule_c@@AAEXABVIdentity_t@@@Z",
                 TeamViewModule_SlotJoinTeamRequestFailed_Hook);
 
-            _joinTeamRequestFailedHighHook = CreateAndActivateHook<TeamViewModule_c.DSlotJoinTeamRequestFailed>(
+            _joinTeamRequestFailedHighHook = CreateAndActivateHook<TeamViewModule_c.DSlotJoinTeamRequestFailed>(ref _joinTeamRequestFailedHighHook, 
                 "GUI.dll", "?SlotJoinTeamRequestFailedTooHigh@TeamViewModule_c@@AAEXABVIdentity_t@@@Z",
                 TeamViewModule_SlotJoinTeamRequestFailed_Hook);
 
-            _performSpecialActionHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DPerformSpecialAction>(
+            _performSpecialActionHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DPerformSpecialAction>(ref _performSpecialActionHook, 
                 "Gamecode.dll", "?N3Msg_PerformSpecialAction@n3EngineClientAnarchy_t@@QAE_NABVIdentity_t@@@Z",
                 N3EngineClientAnarchy_PerformSpecialAction_Hook);
 
-            _handleGroupMessageHook = CreateAndActivateHook<ChatGUIModule_t.DHandleGroupAction>(
+            _handleGroupMessageHook = CreateAndActivateHook<ChatGUIModule_t.DHandleGroupAction>(ref _handleGroupMessageHook, 
                 "GUI.dll", "?HandleGroupMessage@ChatGUIModule_c@@AAEXPBUGroupMessage_t@Client_c@ppj@@@Z",
                 HandleGroupMessage_Hook);
 
-            _castNanoSpellHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DCastNanoSpell>(
+            _castNanoSpellHook = CreateAndActivateHook<N3EngineClientAnarchy_t.DCastNanoSpell>(ref _castNanoSpellHook, 
                 "Gamecode.dll", "?N3Msg_CastNanoSpell@n3EngineClientAnarchy_t@@QAEXABVIdentity_t@@0@Z",
                 N3EngineClientAnarchy_CastNanoSpell_Hook);
 
-            _containerOpenedHook = CreateAndActivateHook<InventoryGUIModule_c.DContainerOpened>(
+            _containerOpenedHook = CreateAndActivateHook<InventoryGUIModule_c.DContainerOpened>(ref _containerOpenedHook, 
                 "GUI.dll", "?SlotContainerOpened@InventoryGUIModule_c@@AAEXABVIdentity_t@@_N1@Z",
                 ContainerOpened_Hook);
 
-            _buttonBaseSetValueHook = CreateAndActivateHook<ButtonBase_c.DSetValue>(
+            _buttonBaseSetValueHook = CreateAndActivateHook<ButtonBase_c.DSetValue>(ref _buttonBaseSetValueHook, 
                 "GUI.dll", "?SetValue@ButtonBase_c@@UAEXABVVariant@@_N@Z",
                 ButtonBase_SetValue_Hook);
 
-            _checkBoxSlotButtonToggledHook = CreateAndActivateHook<CheckBox_c.DSlotButtonToggled>(
+            _checkBoxSlotButtonToggledHook = CreateAndActivateHook<CheckBox_c.DSlotButtonToggled>(ref _checkBoxSlotButtonToggledHook, 
                 "GUI.dll", "?SlotButtonToggled@CheckBox_c@@AAEX_N@Z",
                 CheckBox_SlotButtonToggled_Hook);
 
-            _dynamicIdGetIdHook = CreateAndActivateHook<DynamicID_t.DGetID>(
+            _dynamicIdGetIdHook = CreateAndActivateHook<DynamicID_t.DGetID>(ref _dynamicIdGetIdHook, 
                 "AFCM.dll", "?GetID@DynamicID_t@@QAEHPBD_N@Z",
                 DynamicID_GetID_Hook);
 
-            _multiListViewItemSelectHook = CreateAndActivateHook<MultiListViewItem_c.DSelect>(
+            _multiListViewItemSelectHook = CreateAndActivateHook<MultiListViewItem_c.DSelect>(ref _multiListViewItemSelectHook, 
                 "GUI.dll", "?Select@MultiListViewItem_c@@QAEX_N0@Z",
                 MultiListViewItem_Select_Hook);
 
-            _multiListViewAddItemHook = CreateAndActivateHook<MultiListView_c.DAddItem>(
+            _multiListViewAddItemHook = CreateAndActivateHook<MultiListView_c.DAddItem>(ref _multiListViewAddItemHook, 
                 "GUI.dll",
                 "?AddItem@MultiListView_c@@QAE_NABVIPoint@@PAVMultiListViewItem_c@@_N@Z",
                 MultiListView_AddItem_Hook);
 
-            _multiListViewRemoveItemHook = CreateAndActivateHook<MultiListView_c.DRemoveItem>(
+            _multiListViewRemoveItemHook = CreateAndActivateHook<MultiListView_c.DRemoveItem>(ref _multiListViewRemoveItemHook, 
                 "GUI.dll",
                 "?RemoveItem@MultiListView_c@@QAEXPAVMultiListViewItem_c@@@Z",
                 MultiListView_RemoveItem_Hook);
-            // _sendHook = CreateAndActivateHook<Connection_t.DSend>(
+            // _sendHook = CreateAndActivateHook<Connection_t.DSend>(ref _sendHook, 
             //     "Connection.dll", "?Send@Connection_t@@QAEHIIPBX@Z",
             //     Send_Hook);
 
-            _wsRecvHook = CreateAndActivateHook<Ws2_32.RecvDelegate>(
+            _wsRecvHook = CreateAndActivateHook<Ws2_32.RecvDelegate>(ref _wsRecvHook, 
                 "ws2_32.dll", "recv",
                 WsRecv_Hook);
 
