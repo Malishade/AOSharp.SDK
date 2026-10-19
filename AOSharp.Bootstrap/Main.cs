@@ -406,6 +406,7 @@ namespace AOSharp.Bootstrap
                 _viewDeletedHook?.Enable();
                 _removeWindowHook?.Enable();
                 _dataBlockToMessageHook?.Enable();
+                _sendHook?.Enable();
                 _playfieldInitHook?.Enable();
                 _joinTeamRequestHook?.Enable();
                 _joinTeamRequestFailedLowHook?.Enable();
@@ -520,9 +521,9 @@ namespace AOSharp.Bootstrap
                 "GUI.dll",
                 "?RemoveItem@MultiListView_c@@QAEXPAVMultiListViewItem_c@@@Z",
                 MultiListView_RemoveItem_Hook);
-            // _sendHook = CreateAndActivateHook<Connection_t.DSend>(ref _sendHook, 
-            //     "Connection.dll", "?Send@Connection_t@@QAEHIIPBX@Z",
-            //     Send_Hook);
+            _sendHook = CreateAndActivateHook<Connection_t.DSend>(ref _sendHook, 
+                "Connection.dll", "?Send@Connection_t@@QAEHIIPBX@Z",
+                Send_Hook);
 
             _wsRecvHook = CreateAndActivateHook<Ws2_32.RecvDelegate>(ref _wsRecvHook, 
                 "ws2_32.dll", "recv",
@@ -731,12 +732,17 @@ namespace AOSharp.Bootstrap
                 _handleGroupMessageHook.OriginalFunction(pThis, pGroupMessage);
         }
 
-        private static int Send_Hook(IntPtr pConnection, uint unk, int len, byte[] buf)
+        private static int Send_Hook(IntPtr pConnection, uint unk, int len, IntPtr buf)
         {
+            // Plugins read a copy; the client sends from its own buffer.
             try
             {
-                if (_pluginProxy != null)
-                    _pluginProxy.SentPacket(buf);
+                if (_pluginProxy != null && buf != IntPtr.Zero && len > 0)
+                {
+                    byte[] copy = new byte[len];
+                    Marshal.Copy(buf, copy, 0, len);
+                    _pluginProxy.SentPacket(copy);
+                }
             }
             catch (Exception ex) { Log.Error(ex, "[Bootstrap] Send_Hook: {Message}", ex.Message); }
 
