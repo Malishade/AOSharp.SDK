@@ -736,15 +736,26 @@ namespace AOSharp.Bootstrap
             return _sendHook.OriginalFunction(pConnection, unk, len, buf);
         }
 
-        private static IntPtr DataBlockToMessage_Hook(uint size, byte[] dataBlock)
+        private static IntPtr DataBlockToMessage_Hook(uint size, IntPtr dataBlock)
         {
-            //Let the client process the packet before we inspect it.
+            // Plugins read a copy taken before the client parses the packet; the client keeps its own buffer.
+            byte[] copy = null;
+            try
+            {
+                if (_pluginProxy != null && dataBlock != IntPtr.Zero && size > 0)
+                {
+                    copy = new byte[size];
+                    Marshal.Copy(dataBlock, copy, 0, (int)size);
+                }
+            }
+            catch (Exception ex) { Log.Error(ex, "[Bootstrap] DataBlockToMessage_Hook copy: {Message}", ex.Message); }
+
             IntPtr pMsg = _dataBlockToMessageHook.OriginalFunction(size, dataBlock);
 
             try
             {
-                if (_pluginProxy != null)
-                    _pluginProxy.DataBlockToMessage(dataBlock);
+                if (copy != null)
+                    _pluginProxy.DataBlockToMessage(copy);
             }
             catch (Exception ex) { Log.Error(ex, "[Bootstrap] DataBlockToMessage_Hook: {Message}", ex.Message); }
 
