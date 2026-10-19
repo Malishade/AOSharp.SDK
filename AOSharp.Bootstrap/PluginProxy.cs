@@ -392,7 +392,7 @@ namespace AOSharp.Bootstrap
 
             foreach (Plugin plugin in _plugins)
             {
-                if (plugin.Initialized)
+                if (plugin.Initialized || !plugin.ReadyForAttempt)
                     continue;
 
                 Log.Information("[Bootstrap] RunPluginInitializations: attempting init for {Type} (attempt {Attempt})", plugin.InstanceTypeName, plugin.InitAttempts + 1);
@@ -478,6 +478,16 @@ namespace AOSharp.Bootstrap
         /// <summary>Published after a successful <see cref="Initialize"/> (read without lock for fast skip in RunEngine).</summary>
         public volatile bool Initialized;
         public int InitAttempts { get; private set; }
+
+        // A failed start is retried, since a plugin can fail while the game is still loading. The
+        // wait doubles each time, and after MaxInitAttempts the plugin is given up on, so one that
+        // fails for good does not rerun its start code every frame.
+        private const int MaxInitAttempts = 6;
+        private static readonly TimeSpan FirstRetryDelay = TimeSpan.FromSeconds(1);
+        private DateTime _nextAttemptUtc = DateTime.MinValue;
+
+        /// <summary>False while waiting before a retry, and for good once the plugin is given up on.</summary>
+        public bool ReadyForAttempt => InitAttempts < MaxInitAttempts && DateTime.UtcNow >= _nextAttemptUtc;
         public string InstanceTypeName => _instance?.GetType()?.FullName ?? "?";
 
         private readonly object _initLock = new object();
@@ -517,8 +527,18 @@ namespace AOSharp.Bootstrap
                 {
                     // Unwrap TargetInvocationException to get the real inner exception
                     Exception inner = ex is System.Reflection.TargetInvocationException tie && tie.InnerException != null ? tie.InnerException : ex;
-                    Log.Warning("[Bootstrap] Plugin.Initialize attempt {Attempt} FAILED for {Type} (will retry): [{ExType}] {Message}", InitAttempts, InstanceTypeName, inner.GetType().Name, inner.Message);
                     Log.Debug(inner, "[Bootstrap] Plugin.Initialize failure detail");
+
+                    if (InitAttempts >= MaxInitAttempts)
+                    {
+                        Log.Error("[Bootstrap] Plugin.Initialize gave up on {Type} after {Attempts} attempts: [{ExType}] {Message}", InstanceTypeName, InitAttempts, inner.GetType().Name, inner.Message);
+                    }
+                    else
+                    {
+                        var delay = TimeSpan.FromTicks(FirstRetryDelay.Ticks << (InitAttempts - 1));
+                        _nextAttemptUtc = DateTime.UtcNow + delay;
+                        Log.Warning("[Bootstrap] Plugin.Initialize attempt {Attempt} FAILED for {Type} (retrying in {Delay}s): [{ExType}] {Message}", InitAttempts, InstanceTypeName, delay.TotalSeconds, inner.GetType().Name, inner.Message);
+                    }
                 }
                 finally
                 {

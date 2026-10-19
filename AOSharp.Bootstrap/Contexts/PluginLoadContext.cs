@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Text;
 
@@ -211,6 +212,14 @@ namespace AOSharp.Bootstrap.Contexts
             return null;
         }
 
+        /// <summary>The runtimes\{rid} folder name native DLLs for this process live under, e.g. win-x86.</summary>
+        private static readonly string ProcessRuntimeId = "win-" + RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+
+        /// <summary>
+        /// A native DLL next to the plugin, or under runtimes\{rid}\native for this process's
+        /// architecture. Builds for other architectures sit in the same runtimes folder and fail to
+        /// load, so they are never picked.
+        /// </summary>
         private static string ProbeUnmanagedInDirectory(string directory, string[] fileNames)
         {
             if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
@@ -221,12 +230,21 @@ namespace AOSharp.Bootstrap.Contexts
                 var direct = Path.Combine(directory, fileName);
                 if (File.Exists(direct))
                     return direct;
+
+                var forThisProcess = Path.Combine(directory, "runtimes", ProcessRuntimeId, "native", fileName);
+                if (File.Exists(forThisProcess))
+                    return forThisProcess;
             }
 
+            var otherRuntimes = Path.DirectorySeparatorChar + "runtimes" + Path.DirectorySeparatorChar;
             try
             {
                 foreach (var candidate in Directory.EnumerateFiles(directory, fileNames[0], SearchOption.AllDirectories))
+                {
+                    if (candidate.IndexOf(otherRuntimes, StringComparison.OrdinalIgnoreCase) >= 0)
+                        continue;
                     return candidate;
+                }
             }
             catch
             {
