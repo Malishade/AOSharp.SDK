@@ -97,12 +97,22 @@ namespace AOSharp.Bootstrap
 
         private static readonly object _hookCreateLock = new object();
 
-        /// <summary>Resolves export address and creates/activates a hook. Returns the hook or null on failure. Optionally restricts execution to given thread IDs (SetExclusiveACL).</summary>
         /// <summary>
-        /// Creates a hook, stores it in <paramref name="slot"/>, and only then activates it. Hooks are set
-        /// up on the injector's thread while the game keeps running on its own, so a hooked function can
-        /// be called the moment the hook is active; its callback reads the slot to call the original, and
-        /// an empty slot there threw out of a native callback and took the game down.
+        /// Hooks are written as the 5-byte relative jump that Detours, MinHook and the other common hook
+        /// libraries write. Reloaded's default is a 6-byte absolute jump, which on a function another
+        /// library has already hooked takes that hook's 5-byte jump plus the instruction behind it and
+        /// fills the rest with NOPs; the other hook's trampoline still returns to the byte after its jump,
+        /// which is now the middle of ours, and the game crashes on the first call. The Steam client's
+        /// dinput.dll proxy hooks Connection_t::Send that way.
+        /// </summary>
+        private static readonly FunctionHookOptions HookOptions = new FunctionHookOptions { PreferRelativeJump = true };
+
+        /// <summary>
+        /// Resolves the export and creates, stores in <paramref name="slot"/>, and only then activates a hook.
+        /// Hooks are set up on the injector's thread while the game keeps running on its own, so a hooked
+        /// function can be called the moment the hook is active; its callback reads the slot to call the
+        /// original, and an empty slot there threw out of a native callback and took the game down.
+        /// Returns null on failure. Optionally restricts execution to given thread IDs (SetExclusiveACL).
         /// </summary>
         private static IHook<T> CreateAndActivateHook<T>(ref IHook<T> slot, string module, string exportName, T hookCallback, int[] exclusiveThreadIds = null) where T : Delegate
         {
@@ -113,11 +123,23 @@ namespace AOSharp.Bootstrap
             {
                 try
                 {
-                    var hook = _reloadedHooks.CreateHook<T>(hookCallback, (long)address);
+                    bool hookedAlready = StartsWithJump(address);
+                    var hook = _reloadedHooks.CreateHook<T>(hookCallback, (long)address, -1, HookOptions);
+
+                    // Reloaded only writes the 5-byte jump when its wrapper is within reach of one; the wider
+                    // patch it falls back to would break the hook already on the function, so leave it be.
+                    if (hookedAlready && !InRelativeJumpRange(address, hook.ReverseWrapper.WrapperPointer))
+                    {
+                        Log.Error("[Bootstrap] Hook skipped ({Export}): another hook is already on it and ours is out of relative jump range", exportName);
+                        return null;
+                    }
+
                     slot = hook;
                     if (exclusiveThreadIds != null && exclusiveThreadIds.Length > 0)
                         SetExclusiveACL(exclusiveThreadIds);
                     hook.Activate();
+                    if (hookedAlready)
+                        Log.Information("[Bootstrap] Hook chained behind an existing hook ({Export})", exportName);
                     return hook;
                 }
                 catch (Exception ex)
@@ -127,6 +149,24 @@ namespace AOSharp.Bootstrap
                 }
             }
         }
+
+        /// <summary>A function another library has hooked starts with its jump: relative, absolute, or push/ret.</summary>
+        private static bool StartsWithJump(IntPtr address)
+        {
+            byte first = Marshal.ReadByte(address);
+            return first == 0xE9
+                || (first == 0xFF && Marshal.ReadByte(address, 1) == 0x25)
+                || (first == 0x68 && Marshal.ReadByte(address, 5) == 0xC3);
+        }
+
+        /// <summary>Reloaded's own test for a relative jump: the target within int.MaxValue of the function.</summary>
+        private static bool InRelativeJumpRange(IntPtr function, IntPtr target)
+        {
+            return Math.Abs(Unsigned(target) - Unsigned(function)) <= int.MaxValue;
+        }
+
+        // Pointers above 2 GB are negative as IntPtr in the 32-bit game.
+        private static long Unsigned(IntPtr pointer) => unchecked((long)(ulong)(nuint)pointer);
 
         // Module initializer - runs when the assembly is loaded
         [ModuleInitializer]
@@ -536,10 +576,10 @@ namespace AOSharp.Bootstrap
                     CommandInterpreter_c.ProcessChatInput = Marshal.GetDelegateForFunctionPointer<CommandInterpreter_c.DProcessChatInput>(pProcessCommand);
                     CommandInterpreter_c.GetCommand = Marshal.GetDelegateForFunctionPointer<CommandInterpreter_c.DGetCommand>(pGetCommand);
 
-                    _processChatInputHook = _reloadedHooks.CreateHook<CommandInterpreter_c.DProcessChatInput>(ProcessChatInput_Hook, (long)pProcessCommand);
+                    _processChatInputHook = _reloadedHooks.CreateHook<CommandInterpreter_c.DProcessChatInput>(ProcessChatInput_Hook, (long)pProcessCommand, -1, HookOptions);
                     _processChatInputHook.Activate();
 
-                    _getCommandHook = _reloadedHooks.CreateHook<CommandInterpreter_c.DGetCommand>(GetCommand_Hook, (long)pGetCommand);
+                    _getCommandHook = _reloadedHooks.CreateHook<CommandInterpreter_c.DGetCommand>(GetCommand_Hook, (long)pGetCommand, -1, HookOptions);
                     _getCommandHook.Activate();
                 }
             }
