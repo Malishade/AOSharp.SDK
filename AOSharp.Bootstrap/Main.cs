@@ -841,12 +841,16 @@ namespace AOSharp.Bootstrap
 
         private static void TeamViewModule_SlotJoinTeamRequest_Hook(IntPtr pThis, ref Identity identity, IntPtr pName)
         {
+            bool showDialog = true;
             try
             {
                 if (_pluginProxy != null)
-                    _pluginProxy.JoinTeamRequest((int)identity.Type, identity.Instance, pName);
+                    showDialog = _pluginProxy.JoinTeamRequest((int)identity.Type, identity.Instance, pName);
             }
             catch (Exception ex) { Log.Error(ex, "[Bootstrap] JoinTeamRequest_Hook: {Message}", ex.Message); }
+
+            if (showDialog)
+                _joinTeamRequestHook.OriginalFunction(pThis, ref identity, pName);
         }
 
         private static void TeamViewModule_SlotJoinTeamRequestFailed_Hook(IntPtr pThis, ref Identity identity)

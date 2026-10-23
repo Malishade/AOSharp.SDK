@@ -35,7 +35,7 @@ namespace AOSharp.Bootstrap
         public TeleportEndedDelegate TeleportEnded;
         public delegate void TeleportFailedDelegate();
         public TeleportFailedDelegate TeleportFailed;
-        public delegate void JoinTeamRequestDelegate(Identity pIdentity, IntPtr pName);
+        public delegate bool JoinTeamRequestDelegate(Identity pIdentity, IntPtr pName);
         public JoinTeamRequestDelegate JoinTeamRequest;
         public delegate void ClientPerformedSpecialActionDelegate(Identity pIdentity);
         public ClientPerformedSpecialActionDelegate ClientPerformedSpecialAction;
@@ -91,18 +91,21 @@ namespace AOSharp.Bootstrap
 
         public void SentPacket(byte[] datablock) => _coreDelegates?.SentPacket?.Invoke(datablock);
 
-        public unsafe void JoinTeamRequest(int type, int id, IntPtr pName)
+        // Returns whether the client's own team dialog should still be shown.
+        public unsafe bool JoinTeamRequest(int type, int id, IntPtr pName)
         {
             if (_coreDelegates?.JoinTeamRequest != null)
             {
-                _coreDelegates.JoinTeamRequest.Invoke(new Identity((IdentityType)type, id), pName);
+                return _coreDelegates.JoinTeamRequest.Invoke(new Identity((IdentityType)type, id), pName);
             }
             else if (_joinTeamRequestMethod != null)
             {
                 // Fallback: Use reflection if delegate creation failed
                 var identity = new Identity((IdentityType)type, id);
-                _joinTeamRequestMethod.Invoke(null, new object[] { identity, pName });
+                return _joinTeamRequestMethod.Invoke(null, new object[] { identity, pName }) is not false;
             }
+
+            return true;
         }
 
         public unsafe void ClientPerformedSpecialAction(int type, int id)

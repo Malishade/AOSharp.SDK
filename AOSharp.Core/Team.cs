@@ -165,25 +165,14 @@ namespace AOSharp.Core
             return teamMembers;
         }
 
-        private static void OnJoinTeamRequest(Identity identity, IntPtr pName)
+        //Returns whether the client should still spawn its team dialog box, which it should unless a plugin replied via event.
+        //The bootstrap hook calls the original slot itself; calling the hooked export from here would re-enter the hook forever.
+        private static bool OnJoinTeamRequest(Identity identity, IntPtr pName)
         {
             TeamRequestEventArgs args = new TeamRequestEventArgs(identity);
             TeamRequest?.Invoke(null, args);
 
-            if (!Game.IsAOLite)
-            {
-                //Kinda weird but basically this is to call the original event that spawns the team dialog box.
-                //We only want to spawn the dialog box if we didn't reply immediately via event.
-                if (!args.Responded)
-                {
-                    IntPtr pTeamViewModule = TeamViewModule_c.GetInstanceIfAny();
-
-                    if (pTeamViewModule == IntPtr.Zero)
-                        return;
-
-                    TeamViewModule_c.SlotJoinTeamRequest(pTeamViewModule, ref identity, pName);
-                }
-            }
+            return !Game.IsAOLite && !args.Responded;
         }
 
         internal static void OnMemberLeft(Identity leaver)
